@@ -1689,6 +1689,16 @@
     "react-native-drawer-layout-polyfill": {
       "version": "1.2.0"
     },
+    "react-native-form-generator": {
+      "version": "0.9.9",
+      "from": "react-native-form-generator",
+      "resolved": "https://registry.npmjs.org/react-native-form-generator/-/react-native-form-generator-0.9.9.tgz"
+    },
+    "react-native-keyboard-aware-scroll-view": {
+      "version": "0.2.8",
+      "from": "react-native-keyboard-aware-scroll-view@latest",
+      "resolved": "https://registry.npmjs.org/react-native-keyboard-aware-scroll-view/-/react-native-keyboard-aware-scroll-view-0.2.8.tgz"
+    },
     "react-native-swiper": {
       "version": "1.5.4",
       "from": "react-native-swiper@latest",
