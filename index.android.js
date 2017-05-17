@@ -9,11 +9,11 @@ import {
     View,
     TouchableWithoutFeedback,
     TouchableOpacity,
-    BackHandler
+    BackHandler,
+	WebView
 } from 'react-native';
 import * as Animatable from 'react-native-animatable';
 import {StackNavigator} from 'react-navigation';
-import {TabNavigator} from 'react-navigation';
 import {NavigationActions} from 'react-navigation';
 import Camera from 'react-native-camera';
 import Swiper from 'react-native-swiper';
@@ -21,7 +21,7 @@ import {Form, Separator, InputField, LinkField,
 		SwitchField, PickerField, DatePickerField, 
 		TimePickerField } 
 from 'react-native-form-generator';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 
 class MainView extends Component {
 
@@ -31,8 +31,14 @@ class MainView extends Component {
             tapped: false,
             camera: false,
             swipe: false,
-			news: false
-        }
+			news: false,
+			fetcher: false
+        };
+		this.handleBack = (() => {
+			BackHandler.exitApp();
+            return true;
+        });	
+		BackHandler.addEventListener('hardwareBackPress', this.handleBack);
     }
 
     static navigationOptions = {
@@ -41,38 +47,53 @@ class MainView extends Component {
     };
 
     render() {
-        console.log("tapped:" + this.state.tapped);
-        console.log("camera:" + this.state.camera);
-        console.log("swipe:" + this.state.swipe);
-        console.log("news:" + this.state.news);
-        return (
+		return (
             <View style={styles.container}>
-				<Header title="Accueil"/>
+			
+				<Header title="Accueil" navigation={this.props.navigation}/>
                 <View style={styles.row}>
-                    <TouchableOpacity onPress={() => this.setState({tapped: !this.state.tapped, camera: !this.state.camera })}
+                    <TouchableOpacity onPress={() => this.setState({tapped: !this.state.tapped, news: !this.state.news })}
                                       style={styles.animatedLarge}>
                         <Animatable.View
                             style={styles.buttonLarge}
                             animation={this.state.tapped ? 'zoomOut' : 'slideInUp'}
-                            onAnimationEnd={this.state.camera ? () => {this.props.navigation.navigate('Camera');} : () => {} }>
-                            <TouchableOpacity onPress={() => this.setState({camera: !this.state.camera})}>
-                                <Image style={styles.imageLarge} source={require('./assets/images/camera-logo.png')}/>
-                            </TouchableOpacity>
+                            onAnimationEnd={this.state.news ? () => {
+																			this.setState({tapped: false, news: false});
+																			this.props.navigation.navigate('NewsList');
+										   								} : () => {} }>
+							<Swiper style={styles.animated} 
+									showsButtons={false}
+									loop={true}
+									autoplay={true}
+									autoplayTimeout={4}>
+								<View>
+										<Text>Actualités</Text>
+									<Image style={styles.imageLarge} source={require('./assets/images/koala.jpg')}/>
+								</View>
+								<View>
+									<Image style={styles.imageLarge} source={require('./assets/images/house.jpg')}/>
+								</View>
+								<View>
+									<Image style={styles.imageLarge} source={require('./assets/images/fish.jpg')}/>
+								</View>
+							</Swiper>
                         </Animatable.View>
                     </TouchableOpacity>
 				</View>
 																		 
 				<View style={styles.row}>
-					<TouchableOpacity onPress={() => this.setState({tapped: !this.state.tapped, news: !this.state.news })}
-                                      style={styles.animatedLarge>
+					<TouchableOpacity onPress={() => this.setState({tapped: !this.state.tapped, camera: !this.state.camera })}
+                                      style={styles.animatedLarge}>
                         <Animatable.View
                             style={styles.buttonLarge}
                             animation={this.state.tapped ? 'zoomOut' : 'slideInUp'}
-                            onAnimationEnd={this.state.news ? () => {this.props.navigation.navigate('NewsList');} : () => {} }>
-                            <TouchableOpacity onPress={() => this.setState({news: !this.state.news})}>
-                                <Text>Actualités</Text>
-                            </TouchableOpacity>
-                        </Animatable.View> 
+                            onAnimationEnd={this.state.camera ? () => {
+																		this.setState({tapped: false, camera: false});				
+																		this.props.navigation.navigate('Camera');
+																	} : () => {} }>
+                            
+                                <Image style={styles.imageLarge} source={require('./assets/images/camera-logo.png')}/>
+                        </Animatable.View>
                     </TouchableOpacity>
                 </View>
                 
@@ -80,37 +101,30 @@ class MainView extends Component {
 
                 <View style={styles.row}>
                     <TouchableOpacity onPress={() => this.setState({tapped: !this.state.tapped, swipe: !this.state.swipe })}
-                                      style={styles.animated}>
+                                      style={[styles.animated, {marginRight: 5}]}>
                         <Animatable.View
                             style={styles.button}
                             animation={this.state.tapped ? 'zoomOut' : 'slideInRight'}
-                            onAnimationEnd={this.state.swipe ? () => {this.props.navigation.navigate('Swipe');} : () => {} }>
-                            <TouchableOpacity onPress={() => this.setState({swipe: !this.state.swipe})}>
+							onAnimationEnd={this.state.swipe ? () => {
+																		this.setState({tapped: false, swipe: false});	
+																		this.props.navigation.navigate('Swipe');
+																	} : () => {} }>
+                            
                                 <Text>Swipe</Text>
-                            </TouchableOpacity>
                         </Animatable.View>
                     </TouchableOpacity>
 
-                    <TouchableOpacity onPress={() => this.setState({tapped: !this.state.fontSize })}
-                                      style={[styles.animated, {marginRight: 10}]}>
+                    <TouchableOpacity onPress={() => this.setState({tapped: !this.state.tapped, fetcher: !this.state.fetcher })}
+                                      style={[styles.animated, {marginLeft: 5}]}>
                         <Animatable.View
                             style={styles.button}
                             animation={this.state.tapped ? 'zoomOut' : 'slideInDown'}
-                            onAnimationEnd={this.state.tapped ? () => {} : () => {} }>
-                            <TouchableOpacity onPress={() => this.setState({tapped: !this.state.tapped})}>
-                                <Text>Boutton vide</Text>
-                            </TouchableOpacity>
-                        </Animatable.View>
-                    </TouchableOpacity>
-					<TouchableOpacity onPress={() => this.setState({tapped: !this.state.fontSize })}
-                                      style={styles.animated}>
-                        <Animatable.View
-                            style={styles.button}
-                            animation={this.state.tapped ? 'zoomOut' : 'slideInDown'}
-                            onAnimationEnd={this.state.tapped ? () => {} : () => {} }>
-                            <TouchableOpacity onPress={() => this.setState({tapped: !this.state.tapped})}>
-                                <Text>Boutton vide</Text>
-                            </TouchableOpacity>
+                            onAnimationEnd={this.state.fetcher ? () => {
+																		this.setState({tapped: false, fetcher: false});
+																		this.props.navigation.navigate('Fetcher');
+																	} : () => {} }>
+                                
+								<Text>Web player</Text>
                         </Animatable.View>
                     </TouchableOpacity>
                 </View>
@@ -130,17 +144,17 @@ const styles = StyleSheet.create({
         padding: 10
     },
     animated: {
-        width: (Dimensions.get('window').width-40)/2,
+        width: ((Dimensions.get('window').width)-31)/2,
         height: 120
     },
     button: {
-        width: (Dimensions.get('window').width-40)/2,
+        width: ((Dimensions.get('window').width)-31)/2,
         height: 120,
         borderWidth: 1,
         borderColor: '#000000'
     },
 	image: {
-		width: (Dimensions.get('window').width-40)/2,
+		width: ((Dimensions.get('window').width)-31)/2,
 		height: 120
 	},
 	animatedLarge: {
@@ -159,35 +173,87 @@ const styles = StyleSheet.create({
 	}
 });
 
+class FetchingView extends Component {
+	constructor(props){
+		super(props);
+		this.handleBack = (() => {
+            this.props.navigation.goBack(null);
+            return true;
+        });	
+		BackHandler.addEventListener('hardwareBackPress', this.handleBack);
+	}
+	
+	static navigationOptions = {
+        title: 'Fetching vue',
+		header: null
+    };
+	
+	render(){
+		let datas = require('./assets/json/app.json');
+		console.log(datas);
+		console.log(datas.tiles[0].url);
+		return(
+			<WebView
+				source={{uri: datas.tiles[0].url}}
+				style={{flex: 1, marginTop: 10}}
+			/>
+		);
+	}
+}
+
 class NewsListView extends Component {
+	
+	constructor(props){
+		super(props);
+		this.handleBack = (() => {
+            this.props.navigation.goBack(null);
+            return true;
+        });	
+		BackHandler.addEventListener('hardwareBackPress', this.handleBack);
+	}
 	
 	static navigationOptions = {
         title: 'Liste d\'actus',
 		header: null
     };
 	
+	render(){
+		const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
+		let actualites = ds.cloneWithRows(require('./assets/json/actualites.json'));
+		
+		return(
+			<View style={newsListStyle.container}>
+				<ListView
+					contentContainerStyle={newsListStyle.list}
+					dataSource={actualites}
+					renderHeader={() => <Header title="Actualités"/>}
+					renderRow={(rowData) => <NewsRow title={rowData.title} content={rowData.content} navigation={this.props.navigation}/>}/>
+			</View>
+		);
+	}
+}
+
+class NewsRow extends Component {
 	constructor(props){
 		super(props);
-		const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
-		this.state = {
-			dataSource: ds.cloneWithRows([
-				'John', 'Joel', 'James', 'Jimmy', 'Jackson', 'Jillian', 'Julie', 'Devin'
-			])
-		};
+		
+		this.handleBack = (() => {
+            this.props.navigation.goBack(null);
+            return true;
+        });	
+		BackHandler.addEventListener('hardwareBackPress', this.handleBack);
+	}
+	
+	_showNews(){
+		this.props.navigation.navigate('News', {title: this.props.title, content: this.props.content});
 	}
 	
 	render(){
 		return(
-			<View style={newsListStyle.container}>
-			<Header title="Actualités"/>
-				<ListView
-					dataSource={this.state.dataSource}
-					renderRow={(rowData) => 
-								<View style={newsListStyle.item}><Text>{rowData}</Text></View>
-								
-							}
-				/>
-			</View>
+			<TouchableOpacity onPress={this._showNews.bind(this)} style={newsListStyle.item}>
+				<Text>{this.props.title}</Text>
+				<Text>{this.props.content}</Text>
+			</TouchableOpacity>
 		);
 	}
 }
@@ -195,17 +261,53 @@ class NewsListView extends Component {
 const newsListStyle = StyleSheet.create({
 	container: {
 		flex: 1,
+		height: Dimensions.get('window').height
+	},
+	list: {
+		backgroundColor: 'transparent',
 	},
 	item: {
+		flex: 1,
 		backgroundColor: '#9cadb5',
-		height: 60,
+		maxHeight: 100,
 		marginTop: 5
 	}
 });
 
-class Header extends Component {
+class NewsView extends Component {
 	constructor(props){
 		super(props);
+		const {params} = this.props.navigation.state;
+		this.state = {
+			title: params.title,
+			content: params.content
+		};
+		this.handleBack = (() => {
+            this.props.navigation.goBack(null);
+            return true;
+        });	
+		BackHandler.addEventListener('hardwareBackPress', this.handleBack);
+	}
+	
+	static navigationOptions = {
+        title: 'News vue',
+		header: null
+    };
+	
+	render(){
+		return(
+			<View>
+			<Header title={this.state.title} />
+				<Text>{this.state.title}</Text>
+				<Text>{this.state.content}</Text>
+			</View>
+		);
+	}
+}
+
+class Header extends Component {
+	constructor(props){
+		super(props);	
 	}
 	
 	render(){
@@ -223,6 +325,7 @@ const headerStyles = StyleSheet.create({
 		flex: 1,
 		height: 70,
 		maxHeight: 70,
+		minHeight: 70,
 		flexDirection: 'row',
 		padding: 10,
 		backgroundColor: '#f06a0f'
@@ -247,7 +350,12 @@ class CustomForm extends Component {
 			response: '',
 			message: '',
 			style: ''
-		}
+		};
+		this.handleBack = (() => {
+            this.props.navigation.goBack(null);
+            return true;
+        });	
+		BackHandler.addEventListener('hardwareBackPress', this.handleBack);
 	}
 	
 	handleFormChange(formData){
@@ -289,6 +397,7 @@ class CustomForm extends Component {
 		console.log('response : '+this.state.response);	
 		console.log('style : '+ this.state.style);
 		return(
+			
 			<KeyboardAwareScrollView ref='scroll'>
 				<Text style={{fontSize: 20}}>Formulaire</Text>
 				<View style={[formStyle.messageContainer, formStyle[this.state.style]]}>
@@ -348,11 +457,11 @@ const formStyle = StyleSheet.create({
 class SwipeView extends Component {
     constructor(props){
         super(props);
-        this.handleBack = (() => {
-            console.log('handleBack');
-            this.props.navigation.navigate('Main');
+		this.handleBack = (() => {
+            this.props.navigation.goBack(null);
             return true;
-        });
+        });	
+		BackHandler.addEventListener('hardwareBackPress', this.handleBack);
     }
     
     static navigationOptions = {
@@ -360,16 +469,10 @@ class SwipeView extends Component {
 		header: null
     };
     
-    
-    componentDidMount() {
-        console.log('compMounted');
-        BackHandler.addEventListener('hardwareBackPress', this.handleBack);
-    }
-    
     render(){
         return(
 			<View style={swiperStyles.container}>
-				<Header/>
+				<Header title="Swiper"/>
 				<Swiper style={swiperStyles.swiper} showsButtons={false}>
 					<View style={swiperStyles.view}>
 						<CustomForm/>
@@ -392,6 +495,7 @@ const swiperStyles = StyleSheet.create({
 	},
 	swiper: {
 		flex: 1,
+		marginTop: 70
 	},
 	view: {
 		flex: 1
@@ -404,7 +508,12 @@ class CameraView extends Component {
         super(props);
         this.state = {
             position: '0'
-        }
+        };
+		this.handleBack = (() => {
+            this.props.navigation.goBack(null);
+            return true;
+        });	
+		BackHandler.addEventListener('hardwareBackPress', this.handleBack);
     }
     
     static navigationOptions = {
@@ -481,7 +590,9 @@ const App = StackNavigator({
 		Main: {screen: MainView},
 		Camera: {screen: CameraView},
 		Swipe: {screen: SwipeView},
-		NewsList: {screen: NewsListView}
+		NewsList: {screen: NewsListView},
+		News: {screen: NewsView},
+		Fetcher: {screen: FetchingView}
     },
     {
 		headerMode: 'screen'

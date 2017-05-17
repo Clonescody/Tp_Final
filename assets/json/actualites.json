@@ -1,0 +1,38 @@
+[
+	{
+		"id" 		: "1",
+		"title" 	: "TITRE ACTU 1",
+		"content" 	: "CONTENU BALSDLFPSDLQFPLSDFSDJFOIJSDOFJSDOIFJOSJDFJSODFJOSDJFOSDJFOSDJFOSDJFOSDJFOSDJF",
+		"image" 	: "C:\Users\Jim-Centaure\workspace\ReactNativeProjects\Tp_AppFinale4_4_2\assets\images\koala.jpg"
+	},
+	{
+		"id" 		: "2",
+		"title" 	: "TITRE ACTU 2",
+		"content" 	: "CONTENU BALSDLFPSDLQFPLSDFSDJFOIJSDOFJSDOIFJOSJDFJSODFJOSDJFOSDJFOSDJFOSDJFOSDJFOSDJF",
+		"image" 	: "./assets/images/koala.jpg"
+	},
+	{
+		"id" 		: "3",
+		"title" 	: "TITRE ACTU 3",
+		"content" 	: "CONTENU BALSDLFPSDLQFPLSDFSDJFOIJSDOFJSDOIFJOSJDFJSODFJOSDJFOSDJFOSDJFOSDJFOSDJFOSDJF",
+		"image" 	: "./assets/images/koala.jpg"
+	},
+	{
+		"id" 		: "4",
+		"title" 	: "TITRE ACTU 4",
+		"content" 	: "CONTENU BALSDLFPSDLQFPLSDFSDJFOIJSDOFJSDOIFJOSJDFJSODFJOSDJFOSDJFOSDJFOSDJFOSDJFOSDJF",
+		"image" 	: "./assets/images/koala.jpg"
+	},
+	{
+		"id" 		: "5",
+		"title" 	: "TITRE ACTU 5",
+		"content" 	: "CONTENU BALSDLFPSDLQFPLSDFSDJFOIJSDOFJSDOIFJOSJDFJSODFJOSDJFOSDJFOSDJFOSDJFOSDJFOSDJF",
+		"image" 	: "./assets/images/koala.jpg"
+	},
+	{
+		"id" 		: "6",
+		"title" 	: "TITRE ACTU 6",
+		"content" 	: "CONTENU BALSDLFPSDLQFPLSDFSDJFOIJSDOFJSDOIFJOSJDFJSODFJOSDJFOSDJFOSDJFOSDJFOSDJFOSDJF",
+		"image" 	: "./assets/images/koala.jpg"
+	}	
+]
