@@ -3,19 +3,19 @@
 		"id" 		: "1",
 		"title" 	: "TITRE ACTU 1",
 		"content" 	: "CONTENU BALSDLFPSDLQFPLSDFSDJFOIJSDOFJSDOIFJOSJDFJSODFJOSDJFOSDJFOSDJFOSDJFOSDJFOSDJF",
-		"image" 	: "C:\Users\Jim-Centaure\workspace\ReactNativeProjects\Tp_AppFinale4_4_2\assets\images\koala.jpg"
+		"image" 	: "http://centaure-systems.fr/images/logo_centaure_systems.png"
 	},
 	{
 		"id" 		: "2",
 		"title" 	: "TITRE ACTU 2",
 		"content" 	: "CONTENU BALSDLFPSDLQFPLSDFSDJFOIJSDOFJSDOIFJOSJDFJSODFJOSDJFOSDJFOSDJFOSDJFOSDJFOSDJF",
-		"image" 	: "./assets/images/koala.jpg"
+		"image" 	: "./assets/images/house.jpg"
 	},
 	{
 		"id" 		: "3",
 		"title" 	: "TITRE ACTU 3",
 		"content" 	: "CONTENU BALSDLFPSDLQFPLSDFSDJFOIJSDOFJSDOIFJOSJDFJSODFJOSDJFOSDJFOSDJFOSDJFOSDJFOSDJF",
-		"image" 	: "./assets/images/koala.jpg"
+		"image" 	: "./assets/images/fish.jpg"
 	},
 	{
 		"id" 		: "4",

@@ -22,11 +22,14 @@ import {Form, Separator, InputField, LinkField,
 		TimePickerField } 
 from 'react-native-form-generator';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
+import './config/global.js';
+
 
 class MainView extends Component {
 
     constructor(props) {
         super(props);
+		
         this.state = {
             tapped: false,
             camera: false,
@@ -47,9 +50,11 @@ class MainView extends Component {
     };
 
     render() {
+		/*var reader = new ReadingFileTest();
+		reader._readFile();*/
+		console.log('navigation main : '+this.props.navigation);
 		return (
             <View style={styles.container}>
-			
 				<Header title="Accueil" navigation={this.props.navigation}/>
                 <View style={styles.row}>
                     <TouchableOpacity onPress={() => this.setState({tapped: !this.state.tapped, news: !this.state.news })}
@@ -58,7 +63,7 @@ class MainView extends Component {
                             style={styles.buttonLarge}
                             animation={this.state.tapped ? 'zoomOut' : 'slideInUp'}
                             onAnimationEnd={this.state.news ? () => {
-																			this.setState({tapped: false, news: false});
+																			
 																			this.props.navigation.navigate('NewsList');
 										   								} : () => {} }>
 							<Swiper style={styles.animated} 
@@ -80,7 +85,8 @@ class MainView extends Component {
                         </Animatable.View>
                     </TouchableOpacity>
 				</View>
-																		 
+																			 
+																			 
 				<View style={styles.row}>
 					<TouchableOpacity onPress={() => this.setState({tapped: !this.state.tapped, camera: !this.state.camera })}
                                       style={styles.animatedLarge}>
@@ -173,6 +179,40 @@ const styles = StyleSheet.create({
 	}
 });
 
+/*TODO*/
+class ReadingFileTest extends Component {
+	
+	constructor(props){
+		super(props);
+	}
+	
+	_readFile(){
+		console.log("here");
+		global.RNFS.readDir(global.RNFS.DocumentDirectoryPath) // On Android, use "RNFS.DocumentDirectoryPath" (MainBundlePath is not defined)
+		  .then((result) => {
+			console.log('GOT RESULT', result);
+
+			// stat the first file
+			return Promise.all([global.RNFS.stat(result[0].path), result[0].path]);
+		  })
+		  .then((statResult) => {
+			if (statResult[0].isFile()) {
+			  // if we have a file, read it
+			  return global.RNFS.readFile(statResult[1], 'utf8');
+			}
+
+			return 'no file';
+		  })
+		  .then((contents) => {
+			// log the file contents
+			console.log(contents);
+		  })
+		  .catch((err) => {
+			console.log(err.message, err.code);
+		  });
+	}
+}
+
 class FetchingView extends Component {
 	constructor(props){
 		super(props);
@@ -216,6 +256,10 @@ class NewsListView extends Component {
         title: 'Liste d\'actus',
 		header: null
     };
+
+	_renderRow(rowData){
+		return <NewsRow title={rowData.title} content={rowData.content} navigation={this.props.navigation}/>
+	}
 	
 	render(){
 		const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
@@ -227,7 +271,7 @@ class NewsListView extends Component {
 					contentContainerStyle={newsListStyle.list}
 					dataSource={actualites}
 					renderHeader={() => <Header title="Actualités"/>}
-					renderRow={(rowData) => <NewsRow title={rowData.title} content={rowData.content} navigation={this.props.navigation}/>}/>
+					renderRow={(rowData) => this._renderRow(rowData)}/>
 			</View>
 		);
 	}
@@ -245,7 +289,7 @@ class NewsRow extends Component {
 	}
 	
 	_showNews(){
-		this.props.navigation.navigate('News', {title: this.props.title, content: this.props.content});
+		this.props.navigation.navigate('News', {title: this.props.title, content: this.props.content, image: this.props.image});
 	}
 	
 	render(){
@@ -280,7 +324,8 @@ class NewsView extends Component {
 		const {params} = this.props.navigation.state;
 		this.state = {
 			title: params.title,
-			content: params.content
+			content: params.content,
+			image: params.image
 		};
 		this.handleBack = (() => {
             this.props.navigation.goBack(null);
@@ -298,6 +343,9 @@ class NewsView extends Component {
 		return(
 			<View>
 			<Header title={this.state.title} />
+
+				 <Image style= {{height:50, width:50}} source={{uri: 'koala'}}/>
+
 				<Text>{this.state.title}</Text>
 				<Text>{this.state.content}</Text>
 			</View>
@@ -306,13 +354,25 @@ class NewsView extends Component {
 }
 
 class Header extends Component {
+	
 	constructor(props){
 		super(props);	
+		this._onPressBack = (() => {
+            this.props.navigation.goBack(null);
+            return true;
+        });	
 	}
 	
 	render(){
+		console.log('navigation header : '+this.props.navigation);
 		return(
 			<View style={headerStyles.logoContainer}>
+				<TouchableOpacity onPress={this._onPressBack}>
+				  <Image
+					style={headerStyles.logoImage}
+					source={require('./assets/images/back-arrow.png')}
+				  />
+				</TouchableOpacity>
 				<Image style={headerStyles.logoImage} source={require('./assets/images/camera-logo.png')}/>
 				<Text style={headerStyles.logoTitle}>{this.props.title}</Text>
 			</View>
@@ -368,8 +428,6 @@ class CustomForm extends Component {
 	}
 	
 	_sendInfos() {
-		console.log('nom : '+this.state.formData.first_name);
-		console.log('prenom : '+this.state.formData.last_name);
 		
 		if(this._validateName(this.state.formData.first_name)){
 			this.setState({response: true,
@@ -393,9 +451,6 @@ class CustomForm extends Component {
 	}
 	
 	render(){
-		
-		console.log('response : '+this.state.response);	
-		console.log('style : '+ this.state.style);
 		return(
 			
 			<KeyboardAwareScrollView ref='scroll'>
@@ -403,8 +458,6 @@ class CustomForm extends Component {
 				<View style={[formStyle.messageContainer, formStyle[this.state.style]]}>
                		<Text>{this.state.message}</Text>
                 </View>
-			
-			
 			
 				<View ></View>
     			<Form ref='testForm'
