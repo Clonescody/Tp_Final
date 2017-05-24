@@ -23,7 +23,10 @@ import {Form, Separator, InputField, LinkField,
 from 'react-native-form-generator';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import './config/global.js';
+import AppLoader from './classes/AppLoader.js';
 
+const appLoader = new AppLoader();
+appLoader.init();
 
 class MainView extends Component {
 
@@ -32,16 +35,11 @@ class MainView extends Component {
 		
         this.state = {
             tapped: false,
-            camera: false,
+            report: false,
             swipe: false,
 			news: false,
 			fetcher: false
         };
-		this.handleBack = (() => {
-			BackHandler.exitApp();
-            return true;
-        });	
-		BackHandler.addEventListener('hardwareBackPress', this.handleBack);
     }
 
     static navigationOptions = {
@@ -50,12 +48,9 @@ class MainView extends Component {
     };
 
     render() {
-		/*var reader = new ReadingFileTest();
-		reader._readFile();*/
-		console.log('navigation main : '+this.props.navigation);
 		return (
             <View style={styles.container}>
-				<Header title="Accueil" navigation={this.props.navigation}/>
+				<Header title="Accueil" backArrow="false" navigation={this.props.navigation}/>
                 <View style={styles.row}>
                     <TouchableOpacity onPress={() => this.setState({tapped: !this.state.tapped, news: !this.state.news })}
                                       style={styles.animatedLarge}>
@@ -63,7 +58,7 @@ class MainView extends Component {
                             style={styles.buttonLarge}
                             animation={this.state.tapped ? 'zoomOut' : 'slideInUp'}
                             onAnimationEnd={this.state.news ? () => {
-																			
+																			this.setState({tapped: false, news: false});	
 																			this.props.navigation.navigate('NewsList');
 										   								} : () => {} }>
 							<Swiper style={styles.animated} 
@@ -72,7 +67,6 @@ class MainView extends Component {
 									autoplay={true}
 									autoplayTimeout={4}>
 								<View>
-										<Text>Actualités</Text>
 									<Image style={styles.imageLarge} source={require('./assets/images/koala.jpg')}/>
 								</View>
 								<View>
@@ -88,17 +82,33 @@ class MainView extends Component {
 																			 
 																			 
 				<View style={styles.row}>
-					<TouchableOpacity onPress={() => this.setState({tapped: !this.state.tapped, camera: !this.state.camera })}
+					<TouchableOpacity onPress={() => this.setState({tapped: !this.state.tapped, report: !this.state.report })}
                                       style={styles.animatedLarge}>
                         <Animatable.View
                             style={styles.buttonLarge}
                             animation={this.state.tapped ? 'zoomOut' : 'slideInUp'}
-                            onAnimationEnd={this.state.camera ? () => {
-																		this.setState({tapped: false, camera: false});				
-																		this.props.navigation.navigate('Camera');
+                            onAnimationEnd={this.state.report ? () => {
+																		this.setState({tapped: false, report: false});				
+																		this.props.navigation.navigate('Report');
 																	} : () => {} }>
                             
                                 <Image style={styles.imageLarge} source={require('./assets/images/camera-logo.png')}/>
+                        </Animatable.View>
+                    </TouchableOpacity>
+                </View>
+																		 
+			 	<View style={styles.row}>
+					<TouchableOpacity onPress={() => this.setState({tapped: !this.state.tapped, file: !this.state.file })}
+                                      style={styles.animatedLarge}>
+                        <Animatable.View
+                            style={styles.buttonLarge}
+                            animation={this.state.tapped ? 'zoomOut' : 'slideInUp'}
+                            onAnimationEnd={this.state.file ? () => {
+																		this.setState({tapped: false, file: false});				
+																		this.props.navigation.navigate('Download');
+																	} : () => {} }>
+                            
+                                <Text>Dowload image test</Text>
                         </Animatable.View>
                     </TouchableOpacity>
                 </View>
@@ -179,48 +189,55 @@ const styles = StyleSheet.create({
 	}
 });
 
-/*TODO*/
-class ReadingFileTest extends Component {
+class DownloadFileView extends Component {
 	
 	constructor(props){
 		super(props);
+		this.state = {
+			downloaded: false,
+			RNFS: require('react-native-fs')
+		}
 	}
 	
-	_readFile(){
-		console.log("here");
-		global.RNFS.readDir(global.RNFS.DocumentDirectoryPath) // On Android, use "RNFS.DocumentDirectoryPath" (MainBundlePath is not defined)
-		  .then((result) => {
-			console.log('GOT RESULT', result);
-
-			// stat the first file
-			return Promise.all([global.RNFS.stat(result[0].path), result[0].path]);
-		  })
-		  .then((statResult) => {
-			if (statResult[0].isFile()) {
-			  // if we have a file, read it
-			  return global.RNFS.readFile(statResult[1], 'utf8');
-			}
-
-			return 'no file';
-		  })
-		  .then((contents) => {
-			// log the file contents
-			console.log(contents);
-		  })
-		  .catch((err) => {
-			console.log(err.message, err.code);
-		  });
+	 static navigationOptions = {
+        title: 'Download view',
+		header: null
+    };
+	
+	_downloadFile(){		
+		var url = 'http://centaure-systems.fr/images/logo_centaure_systems.png';
+	  	var path = `${this.state.RNFS.DocumentDirectoryPath}/test.png`;
+		var localPath = '/storage/emulated/0/Download';
+		console.log('AAAA');
+	  	this.state.RNFS.downloadFile({fromUrl:url, toFile: path}).promise.then(res => {
+			this.setState({downloaded: true});
+		  	console.log('downloaded', res);
+		});
+	}
+	
+	render(){
+		
+		if(!this.state.downloaded)
+	  		this._downloadFile();
+	  	const image = this.state.downloaded ? (<View>
+		<Image style={{width: 300,height: 83}} 
+			   source={{uri: `file://${this.state.RNFS.DocumentDirectoryPath}/test.png`
+						,scale: 1}}
+		  />
+		</View>
+		) : null;
+		
+		return(
+			<View>
+			<Header title="Download" navigation={this.props.navigation}/>
+				{image}
+			</View>
+		);
 	}
 }
-
 class FetchingView extends Component {
 	constructor(props){
 		super(props);
-		this.handleBack = (() => {
-            this.props.navigation.goBack(null);
-            return true;
-        });	
-		BackHandler.addEventListener('hardwareBackPress', this.handleBack);
 	}
 	
 	static navigationOptions = {
@@ -230,13 +247,15 @@ class FetchingView extends Component {
 	
 	render(){
 		let datas = require('./assets/json/app.json');
-		console.log(datas);
-		console.log(datas.tiles[0].url);
 		return(
-			<WebView
-				source={{uri: datas.tiles[0].url}}
-				style={{flex: 1, marginTop: 10}}
-			/>
+			<View>
+				<Header title="Web view" navigation={this.props.navigation} />
+				<WebView
+					source={{uri: datas.tiles[0].url}}
+					style={{flex: 1, marginTop: 10}}
+				/>
+			</View>
+			
 		);
 	}
 }
@@ -245,11 +264,6 @@ class NewsListView extends Component {
 	
 	constructor(props){
 		super(props);
-		this.handleBack = (() => {
-            this.props.navigation.goBack(null);
-            return true;
-        });	
-		BackHandler.addEventListener('hardwareBackPress', this.handleBack);
 	}
 	
 	static navigationOptions = {
@@ -270,7 +284,9 @@ class NewsListView extends Component {
 				<ListView
 					contentContainerStyle={newsListStyle.list}
 					dataSource={actualites}
-					renderHeader={() => <Header title="Actualités"/>}
+					renderHeader={() => 
+									<Header title="Actualités" navigation={this.props.navigation}/>
+								 }
 					renderRow={(rowData) => this._renderRow(rowData)}/>
 			</View>
 		);
@@ -280,12 +296,6 @@ class NewsListView extends Component {
 class NewsRow extends Component {
 	constructor(props){
 		super(props);
-		
-		this.handleBack = (() => {
-            this.props.navigation.goBack(null);
-            return true;
-        });	
-		BackHandler.addEventListener('hardwareBackPress', this.handleBack);
 	}
 	
 	_showNews(){
@@ -327,11 +337,6 @@ class NewsView extends Component {
 			content: params.content,
 			image: params.image
 		};
-		this.handleBack = (() => {
-            this.props.navigation.goBack(null);
-            return true;
-        });	
-		BackHandler.addEventListener('hardwareBackPress', this.handleBack);
 	}
 	
 	static navigationOptions = {
@@ -342,7 +347,7 @@ class NewsView extends Component {
 	render(){
 		return(
 			<View>
-			<Header title={this.state.title} />
+			<Header title={this.state.title} navigation={this.props.navigation}/>
 
 				 <Image style= {{height:50, width:50}} source={{uri: 'koala'}}/>
 
@@ -357,22 +362,35 @@ class Header extends Component {
 	
 	constructor(props){
 		super(props);	
-		this._onPressBack = (() => {
-            this.props.navigation.goBack(null);
-            return true;
+		this.state = {
+			backArrow: true
+		};
+		this.props.backArrow ? this.state.backArrow = this.props.backArrow : this.state.backArrow = true;
+		this.handleBack = (() => {
+			if(this.props.title === 'Accueil'){
+				BackHandler.exitApp();
+			}
+			else{
+				this.props.navigation.goBack(null);
+			}
         });	
+		BackHandler.addEventListener('hardwareBackPress', this.handleBack);
 	}
 	
 	render(){
-		console.log('navigation header : '+this.props.navigation);
+		var backArrow = null;
+		if(this.props.title !== 'Accueil'){
+			backArrow = <TouchableOpacity onPress={this.handleBack}>
+									  <Image
+										style={headerStyles.logoImage}
+										source={require('./assets/images/back-arrow.png')}
+									  />
+							  </TouchableOpacity>
+		}
+			
 		return(
 			<View style={headerStyles.logoContainer}>
-				<TouchableOpacity onPress={this._onPressBack}>
-				  <Image
-					style={headerStyles.logoImage}
-					source={require('./assets/images/back-arrow.png')}
-				  />
-				</TouchableOpacity>
+				{backArrow}
 				<Image style={headerStyles.logoImage} source={require('./assets/images/camera-logo.png')}/>
 				<Text style={headerStyles.logoTitle}>{this.props.title}</Text>
 			</View>
@@ -387,7 +405,9 @@ const headerStyles = StyleSheet.create({
 		maxHeight: 70,
 		minHeight: 70,
 		flexDirection: 'row',
-		padding: 10,
+		paddingTop: 10,
+		paddingBottom: 10,
+		paddingLeft: 5,
 		backgroundColor: '#f06a0f'
 	},
 	logoImage: {
@@ -409,22 +429,21 @@ class CustomForm extends Component {
 			formData: '',
 			response: '',
 			message: '',
-			style: ''
+			style: '',
+			position: '0',
 		};
-		this.handleBack = (() => {
-            this.props.navigation.goBack(null);
-            return true;
-        });	
-		BackHandler.addEventListener('hardwareBackPress', this.handleBack);
 	}
 	
 	handleFormChange(formData){
 		this.setState({formData:formData})
-		console.log(this.state.formData);
 	}
 	
 	handleFormFocus(event, reactNode){
    		//this.refs.scroll.scrollToFocusedInput(event, reactNode);
+	}
+	
+	setPositionFromChildren(position){
+		this.setState({position: position});
 	}
 	
 	_sendInfos() {
@@ -450,35 +469,46 @@ class CustomForm extends Component {
 		return true;
 	}
 	
+	_takePicture(){
+		this.props.navigation.navigate('Camera', {setPositionFromChildren: this.setPositionFromChildren.bind(this)});
+	}
+	
 	render(){
+		console.log('state : ', this.state);
 		return(
-			
-			<KeyboardAwareScrollView ref='scroll'>
-				<Text style={{fontSize: 20}}>Formulaire</Text>
-				<View style={[formStyle.messageContainer, formStyle[this.state.style]]}>
-               		<Text>{this.state.message}</Text>
-                </View>
-			
-				<View ></View>
-    			<Form ref='testForm'
-					onFocus={this.handleFormFocus.bind(this)}
-					onChange={this.handleFormChange.bind(this)}
-					label="Personal Information">
-					<InputField 
-					 	ref='first_name' 
-					 	placeholder='First Name'
-						style={formStyle.input}/>
-					
-					<InputField 
-					 	ref='last_name' 
-					 	placeholder='Last Name'
-						style={formStyle.input}/>
-				</Form>
-				<TouchableOpacity onPress={this._sendInfos.bind(this)}
-                                      style={[styles.animated, {marginRight: 10}]}>
-						<Text>Envoyer</Text>
-				</TouchableOpacity>
-			</KeyboardAwareScrollView>
+			<View>
+				<Header title='Envoyer un rapport' navigation={this.props.navigation} />
+				<KeyboardAwareScrollView ref='scroll'>
+					<Text style={{fontSize: 20}}>Formulaire</Text>
+					<View style={[formStyle.messageContainer, formStyle[this.state.style]]}>
+						<Text>{this.state.message}</Text>
+					</View>
+
+					<View ></View>
+					<Form ref='testForm'
+						onFocus={this.handleFormFocus.bind(this)}
+						onChange={this.handleFormChange.bind(this)}
+						label="Personal Information">
+						<InputField 
+							ref='first_name' 
+							placeholder='First Name'
+							style={formStyle.input}/>
+
+						<InputField 
+							ref='last_name' 
+							placeholder='Last Name'
+							style={formStyle.input}/>
+						<TouchableOpacity onPress={this._takePicture.bind(this)}
+										  style={[styles.animated, {marginRight: 10}]}>
+							<Text>Prendre photo</Text>
+						</TouchableOpacity>
+					</Form>
+					<TouchableOpacity onPress={this._sendInfos.bind(this)}
+										  style={[styles.animated, {marginRight: 10}]}>
+							<Text>Envoyer</Text>
+					</TouchableOpacity>
+				</KeyboardAwareScrollView>
+			</View>
 			
 		);
 	}
@@ -510,11 +540,6 @@ const formStyle = StyleSheet.create({
 class SwipeView extends Component {
     constructor(props){
         super(props);
-		this.handleBack = (() => {
-            this.props.navigation.goBack(null);
-            return true;
-        });	
-		BackHandler.addEventListener('hardwareBackPress', this.handleBack);
     }
     
     static navigationOptions = {
@@ -525,7 +550,7 @@ class SwipeView extends Component {
     render(){
         return(
 			<View style={swiperStyles.container}>
-				<Header title="Swiper"/>
+				<Header title="Swiper" navigation={this.props.navigation}/>
 				<Swiper style={swiperStyles.swiper} showsButtons={false}>
 					<View style={swiperStyles.view}>
 						<CustomForm/>
@@ -555,6 +580,25 @@ const swiperStyles = StyleSheet.create({
 	}
 });
 
+class ReportView extends Component {
+	constructor(props){
+		super(props);
+	}
+	
+	static navigationOptions = {
+        title: 'Swipe vue',
+		header: null
+    };
+	
+	render(){
+		return(
+			<View>
+				<CustomForm navigation={this.props.navigation}/>
+			</View>
+		);
+	}
+}
+
 class CameraView extends Component {
 
     constructor(props) {
@@ -562,11 +606,6 @@ class CameraView extends Component {
         this.state = {
             position: '0'
         };
-		this.handleBack = (() => {
-            this.props.navigation.goBack(null);
-            return true;
-        });	
-		BackHandler.addEventListener('hardwareBackPress', this.handleBack);
     }
     
     static navigationOptions = {
@@ -583,13 +622,14 @@ class CameraView extends Component {
             },
             (error) => {
                 console.log(JSON.stringify(error));
-                this.props.navigation.navigate('Main');
+                this.props.navigation.goBack();
             },
             {enableHighAccuracy: true, timeout: 50000}
         );
         if(this.state.position)
             options.location = this.state.position;
         
+		console.log('pos :', this.state.position);
         console.log('pos0 :' + options.location);
         this.camera.capture({metadata: options})
             .then((data) => console.log(data))
@@ -597,12 +637,16 @@ class CameraView extends Component {
 
         console.log('pos1 :' + options.location);
         console.log('pos2 :' + JSON.stringify(options.location));
+		
+		this.props.navigation.state.params.setPositionFromChildren(this.state.position);
+  		this.props.navigation.goBack();
 
     }
 
     render() {
         return (
           <View style={cameraStyle.container}>
+			<Header title="Prendre une photo" navigation={this.props.navigation} />
             <Camera
               ref={(cam) => {
                 this.camera = cam;
@@ -619,7 +663,7 @@ class CameraView extends Component {
 const cameraStyle = StyleSheet.create({
     container: {
     flex: 1,
-    flexDirection: 'row',
+    flexDirection: 'column',
   },
   preview: {
     flex: 1,
@@ -645,7 +689,9 @@ const App = StackNavigator({
 		Swipe: {screen: SwipeView},
 		NewsList: {screen: NewsListView},
 		News: {screen: NewsView},
-		Fetcher: {screen: FetchingView}
+		Fetcher: {screen: FetchingView},
+		Download: {screen: DownloadFileView},
+		Report: {screen: ReportView}
     },
     {
 		headerMode: 'screen'

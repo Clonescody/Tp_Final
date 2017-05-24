@@ -23,7 +23,6 @@ export default class AssetsComponents extends Component {
 			tmp.push({id: item.id, url: item.image});
 		});
 		this.state.images = tmp;
-		console.log(this.state.images);
 	}
 	
 	getAsset(id){
