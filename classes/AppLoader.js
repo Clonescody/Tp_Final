@@ -2,47 +2,75 @@ import React, {Component} from 'react';
 import {ListView,} from 'react-native';
 
 export default class AppLoader {
-	
-	newsList: '';
-	
-	constructor(){}
-	
-	init(){
-		newsList = this.getNewsFromApi();
+		
+	constructor(){
+		this.dataJson = '';
+		this.dataLoaded = false;
+		this.dataWritten = false;
 	}
 	
-	getNewsFromApi(){
+	init(){
+		this._getNewsFromApi();
+		return this.dataLoaded;
+	}
+
+	async _getNewsFromApi(){
 		
 		
-		/*let actualites =  fetch('http://centoapp.centaure-systems.fr/api/1/news/list',{ 
-											method: 'GET',
-										  	headers: {
-												'Accept': 'application/json',
-												'Content-Type': 'application/json',
-										  	}
-										}).then((response) => (response.json())).then((json) => { console.log('json :', json)});
-		const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
-		let test = fetch('http://centoapp.centaure-systems.fr/api/1/news/list').then(reponse => response.json())
-  														.then(json => console.log(json.id))
-		let actualites = ds.cloneWithRows(fetch('http://centoapp.centaure-systems.fr/api/1/news/list'));
-		let actualites = fetch('http://centoapp.centaure-systems.fr/api/1/news/list')
-							.then((response) => response.json())
-						  	.then((responseJson) => {
-								return responseJson;
-						  	})
-						  	.catch((error) => {
-								console.error(error);
-						  	});		
-		console.log('liste actu : ', JSON.stringify(actualites));
-		console.log('test : ', test);*/
-		let actualites = fetch('http://centoapp.centaure-systems.fr/api/1/news/list')
-							.then((response) => {
-								return response;
-						  	})
-						  	.catch((error) => {
-								console.error(error);
-						  	});
-		console.log("actualites : ", actualites);
-		return actualites;
+		try {
+			let response = await fetch('http://demo.centoapp.centaure-systems.fr/api/1/news/list');
+			let responseJson = await response.json();
+			this.dataJson = responseJson;
+				console.log('data getNews : ',this.dataJson);
+				return this.dataJson;
+			} catch(error) {
+			  console.error(error);
+			}
+		
+		
+		
+		
+		/*try{
+			fetch('http://demo.centoapp.centaure-systems.fr/api/1/news/list')
+						.then((response) => await response.json())
+						.then((responseJson) => {
+							this.dataJson = await responseJson;
+							console.log("dataJson loader : ", this.dataJson);
+							this.dataLoaded = true;
+							})
+						.catch((error) => {
+							console.error(error);
+						});
+		}catch(e){
+			console.error(e);
+		}
+		
+		return this.dataJson;	*/			
+	}
+	
+	_writeNews(){
+		
+		var RNFS = require('react-native-fs');
+
+		var path = RNFS.DocumentDirectoryPath + '/news.json';
+
+		RNFS.writeFile(path, this.dataJson, 'utf8')
+		  .then((success) => {
+			console.log('dataJson writer : ', this.dataJson)
+			console.log('FILE WRITTEN!');
+			this.dataWritten = true;
+		  })
+		  .catch((err) => {
+			console.log(err.message);
+		  });
+		this._readNews();
+	}
+	
+	_readNews(){
+		
+		var RNFS = require('react-native-fs');
+		var path = RNFS.DocumentDirectoryPath + '/news.json';
+		RNFS.readFile(path, 'utf8').then((news) => {console.log('newsFile', JSON.stringify(news))});
+		
 	}
 }

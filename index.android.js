@@ -19,14 +19,42 @@ import Camera from 'react-native-camera';
 import Swiper from 'react-native-swiper';
 import {Form, Separator, InputField, LinkField, 
 		SwitchField, PickerField, DatePickerField, 
-		TimePickerField } 
+		TimePickerField} 
 from 'react-native-form-generator';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import './config/global.js';
 import AppLoader from './classes/AppLoader.js';
 
 const appLoader = new AppLoader();
-appLoader.init();
+
+
+class TestView extends Component {
+	
+	constructor(props){
+		super(props);
+		this.state = {
+			actualites: appLoader.dataJson
+		};
+		console.log("contstuct");
+	}
+	
+	_renderRow(rowData){
+		return <NewsRow title={rowData.title} content={rowData.content} navigation={this.props.navigation}/>
+	}
+
+	render(){
+		return(
+			<View>
+				<Text>ID : {this.state.actualites[0].id}</Text>
+				<Text>TITRE : {this.state.actualites[0].title}</Text>
+				<Text>TEXTE : {this.state.actualites[0].texte}</Text>
+				<Text>CREATED_AT : {this.state.actualites[0].created_at.date}</Text>
+			</View>
+		);
+	}
+}
+
+
 
 class MainView extends Component {
 
@@ -38,8 +66,12 @@ class MainView extends Component {
             report: false,
             swipe: false,
 			news: false,
-			fetcher: false
+			fetcher: false,
+			firstNews: []
         };
+		
+		console.log("construct MAIN");
+		
     }
 
     static navigationOptions = {
@@ -47,20 +79,28 @@ class MainView extends Component {
 		header: null
     };
 
-    render() {
-		return (
-            <View style={styles.container}>
+	componentWillMount(){
+		console.log('main willMount');
+		var display = appLoader.init();
+		console.log("dataJson MAIN : ", appLoader.dataJson);
+		this.state.firstNews.push(appLoader.dataJson[0]);
+	}
+
+    render(){
+		console.log('renderMAIN');
+			return (
+				<View style={styles.container}>
 				<Header title="Accueil" backArrow="false" navigation={this.props.navigation}/>
-                <View style={styles.row}>
-                    <TouchableOpacity onPress={() => this.setState({tapped: !this.state.tapped, news: !this.state.news })}
-                                      style={styles.animatedLarge}>
-                        <Animatable.View
-                            style={styles.buttonLarge}
-                            animation={this.state.tapped ? 'zoomOut' : 'slideInUp'}
-                            onAnimationEnd={this.state.news ? () => {
+				<View style={styles.row}>
+					<TouchableOpacity onPress={() => this.setState({tapped: !this.state.tapped, news: !this.state.news })}
+									  style={styles.animatedLarge}>
+						<Animatable.View
+							style={styles.buttonLarge}
+							animation={this.state.tapped ? 'zoomOut' : 'slideInUp'}
+							onAnimationEnd={this.state.news ? () => {
 																			this.setState({tapped: false, news: false});	
 																			this.props.navigation.navigate('NewsList');
-										   								} : () => {} }>
+																		} : () => {} }>
 							<Swiper style={styles.animated} 
 									showsButtons={false}
 									loop={true}
@@ -76,76 +116,80 @@ class MainView extends Component {
 									<Image style={styles.imageLarge} source={require('./assets/images/fish.jpg')}/>
 								</View>
 							</Swiper>
-                        </Animatable.View>
-                    </TouchableOpacity>
+						</Animatable.View>
+					</TouchableOpacity>
 				</View>
-																			 
-																			 
+
+
 				<View style={styles.row}>
 					<TouchableOpacity onPress={() => this.setState({tapped: !this.state.tapped, report: !this.state.report })}
-                                      style={styles.animatedLarge}>
-                        <Animatable.View
-                            style={styles.buttonLarge}
-                            animation={this.state.tapped ? 'zoomOut' : 'slideInUp'}
-                            onAnimationEnd={this.state.report ? () => {
+									  style={styles.animatedLarge}>
+						<Animatable.View
+							style={styles.buttonLarge}
+							animation={this.state.tapped ? 'zoomOut' : 'slideInUp'}
+							onAnimationEnd={this.state.report ? () => {
 																		this.setState({tapped: false, report: false});				
 																		this.props.navigation.navigate('Report');
 																	} : () => {} }>
-                            
-                                <Image style={styles.imageLarge} source={require('./assets/images/camera-logo.png')}/>
-                        </Animatable.View>
-                    </TouchableOpacity>
-                </View>
-																		 
-			 	<View style={styles.row}>
+
+								<Image style={styles.imageLarge} source={require('./assets/images/camera-logo.png')}/>
+						</Animatable.View>
+					</TouchableOpacity>
+				</View>
+
+				<View style={styles.row}>
 					<TouchableOpacity onPress={() => this.setState({tapped: !this.state.tapped, file: !this.state.file })}
-                                      style={styles.animatedLarge}>
-                        <Animatable.View
-                            style={styles.buttonLarge}
-                            animation={this.state.tapped ? 'zoomOut' : 'slideInUp'}
-                            onAnimationEnd={this.state.file ? () => {
+									  style={styles.animatedLarge}>
+						<Animatable.View
+							style={styles.buttonLarge}
+							animation={this.state.tapped ? 'zoomOut' : 'slideInUp'}
+							onAnimationEnd={this.state.file ? () => {
 																		this.setState({tapped: false, file: false});				
 																		this.props.navigation.navigate('Download');
 																	} : () => {} }>
-                            
-                                <Text>Dowload image test</Text>
-                        </Animatable.View>
-                    </TouchableOpacity>
-                </View>
-                
+
+								<Text>Dowload image test</Text>
+						</Animatable.View>
+					</TouchableOpacity>
+				</View>
 
 
-                <View style={styles.row}>
-                    <TouchableOpacity onPress={() => this.setState({tapped: !this.state.tapped, swipe: !this.state.swipe })}
-                                      style={[styles.animated, {marginRight: 5}]}>
-                        <Animatable.View
-                            style={styles.button}
-                            animation={this.state.tapped ? 'zoomOut' : 'slideInRight'}
+
+				<View style={styles.row}>
+					<TouchableOpacity onPress={() => this.setState({tapped: !this.state.tapped, swipe: !this.state.swipe })}
+									  style={[styles.animated, {marginRight: 5}]}>
+						<Animatable.View
+							style={styles.button}
+							animation={this.state.tapped ? 'zoomOut' : 'slideInRight'}
 							onAnimationEnd={this.state.swipe ? () => {
 																		this.setState({tapped: false, swipe: false});	
 																		this.props.navigation.navigate('Swipe');
 																	} : () => {} }>
-                            
-                                <Text>Swipe</Text>
-                        </Animatable.View>
-                    </TouchableOpacity>
 
-                    <TouchableOpacity onPress={() => this.setState({tapped: !this.state.tapped, fetcher: !this.state.fetcher })}
-                                      style={[styles.animated, {marginLeft: 5}]}>
-                        <Animatable.View
-                            style={styles.button}
-                            animation={this.state.tapped ? 'zoomOut' : 'slideInDown'}
-                            onAnimationEnd={this.state.fetcher ? () => {
+								<Text>Swipe</Text>
+						</Animatable.View>
+					</TouchableOpacity>
+
+					<TouchableOpacity onPress={() => this.setState({tapped: !this.state.tapped, fetcher: !this.state.fetcher })}
+									  style={[styles.animated, {marginLeft: 5}]}>
+						<Animatable.View
+							style={styles.button}
+							animation={this.state.tapped ? 'zoomOut' : 'slideInDown'}
+							onAnimationEnd={this.state.fetcher ? () => {
 																		this.setState({tapped: false, fetcher: false});
 																		this.props.navigation.navigate('Fetcher');
 																	} : () => {} }>
-                                
+
 								<Text>Web player</Text>
-                        </Animatable.View>
-                    </TouchableOpacity>
-                </View>
-            </View>
-        );
+						</Animatable.View>
+					</TouchableOpacity>
+				</View>
+			</View>
+			);
+			
+            
+        
+		
     }
 }
 
@@ -208,7 +252,6 @@ class DownloadFileView extends Component {
 		var url = 'http://centaure-systems.fr/images/logo_centaure_systems.png';
 	  	var path = `${this.state.RNFS.DocumentDirectoryPath}/test.png`;
 		var localPath = '/storage/emulated/0/Download';
-		console.log('AAAA');
 	  	this.state.RNFS.downloadFile({fromUrl:url, toFile: path}).promise.then(res => {
 			this.setState({downloaded: true});
 		  	console.log('downloaded', res);
@@ -264,6 +307,9 @@ class NewsListView extends Component {
 	
 	constructor(props){
 		super(props);
+		this.state = {
+			actualites: appLoader.dataJson
+		};
 	}
 	
 	static navigationOptions = {
@@ -272,12 +318,12 @@ class NewsListView extends Component {
     };
 
 	_renderRow(rowData){
-		return <NewsRow title={rowData.title} content={rowData.content} navigation={this.props.navigation}/>
+		return <NewsRow title={rowData.title} content={rowData.texte} navigation={this.props.navigation}/>
 	}
 	
 	render(){
 		const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
-		let actualites = ds.cloneWithRows(require('./assets/json/actualites.json'));
+		let actualites = ds.cloneWithRows(this.state.actualites);
 		
 		return(
 			<View style={newsListStyle.container}>
@@ -550,7 +596,6 @@ class SwipeView extends Component {
     render(){
         return(
 			<View style={swiperStyles.container}>
-				<Header title="Swiper" navigation={this.props.navigation}/>
 				<Swiper style={swiperStyles.swiper} showsButtons={false}>
 					<View style={swiperStyles.view}>
 						<CustomForm/>
@@ -681,8 +726,6 @@ const cameraStyle = StyleSheet.create({
 });
 
 
-
-
 const App = StackNavigator({
 		Main: {screen: MainView},
 		Camera: {screen: CameraView},
@@ -691,7 +734,8 @@ const App = StackNavigator({
 		News: {screen: NewsView},
 		Fetcher: {screen: FetchingView},
 		Download: {screen: DownloadFileView},
-		Report: {screen: ReportView}
+		Report: {screen: ReportView},
+		Test: {screen: TestView}
     },
     {
 		headerMode: 'screen'
